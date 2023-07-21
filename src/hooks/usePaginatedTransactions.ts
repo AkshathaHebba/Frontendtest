@@ -22,7 +22,11 @@ export function usePaginatedTransactions(): PaginatedTransactionsResult {
         return response
       }
 
-      return { data: response.data, nextPage: response.nextPage }
+      console.log('response.nextPage ', response.nextPage )
+
+      /*BUG 4: Append with the exisiting data to show more transaction within the page,
+      this allows to load more within the page*/
+      return { data: [...previousResponse.data, ...response.data], nextPage: response.nextPage }
     })
   }, [fetchWithCache, paginatedTransactions])
 

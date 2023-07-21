@@ -7,12 +7,15 @@ import { usePaginatedTransactions } from "./hooks/usePaginatedTransactions"
 import { useTransactionsByEmployee } from "./hooks/useTransactionsByEmployee"
 import { EMPTY_EMPLOYEE } from "./utils/constants"
 import { Employee } from "./utils/types"
+import {useWrappedRequest} from "./hooks/useWrappedRequest";
 
 export function App() {
   const { data: employees, ...employeeUtils } = useEmployees()
   const { data: paginatedTransactions, ...paginatedTransactionsUtils } = usePaginatedTransactions()
   const { data: transactionsByEmployee, ...transactionsByEmployeeUtils } = useTransactionsByEmployee()
-  const [isLoading, setIsLoading] = useState(false)
+  // const [isLoading, setIsLoading] = useState(false)
+
+  console.log('paginatedTransactions', paginatedTransactions)
 
   const transactions = useMemo(
     () => paginatedTransactions?.data ?? transactionsByEmployee ?? null,
@@ -20,13 +23,13 @@ export function App() {
   )
 
   const loadAllTransactions = useCallback(async () => {
-    setIsLoading(true)
+    // setIsLoading(true)
     transactionsByEmployeeUtils.invalidateData()
 
     await employeeUtils.fetchAll()
     await paginatedTransactionsUtils.fetchAll()
 
-    setIsLoading(false)
+    // setIsLoading(false)
   }, [employeeUtils, paginatedTransactionsUtils, transactionsByEmployeeUtils])
 
   const loadTransactionsByEmployee = useCallback(
@@ -51,7 +54,10 @@ export function App() {
         <hr className="RampBreak--l" />
 
         <InputSelect<Employee>
-          isLoading={isLoading}
+          isLoading={employeeUtils.loading}
+            /*Bug 5:  loading is being exposed from useEmployee Hook
+          provided in the employee util, decide to loading the employee based on this than
+           using state(commented above)*/
           defaultValue={EMPTY_EMPLOYEE}
           items={employees === null ? [] : [EMPTY_EMPLOYEE, ...employees]}
           label="Filter by employee"
@@ -64,7 +70,13 @@ export function App() {
             if (newValue === null) {
               return
             }
-
+            /*BUG 3: When we select all employee the newValue.id is null (see also error page)
+            * We need to call loadAlltransactions to fix this bug.
+            * */
+            if (newValue.id === "") {
+              await loadAllTransactions();
+              return
+            }
             await loadTransactionsByEmployee(newValue.id)
           }}
         />
@@ -74,7 +86,10 @@ export function App() {
         <div className="RampGrid">
           <Transactions transactions={transactions} />
 
-          {transactions !== null && (
+          {(transactions !== null && !!paginatedTransactions?.nextPage) && (
+              /*BUG 6: nextPage was already exposed, this will give
+              information about any additional transaction
+              we can decide to hide or display the button accordingly*/
             <button
               className="RampButton"
               disabled={paginatedTransactionsUtils.loading}

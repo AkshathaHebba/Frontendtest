@@ -1,5 +1,5 @@
 import classNames from "classnames"
-import { useRef } from "react"
+import React, { useRef } from "react"
 import { InputCheckboxComponent } from "./types"
 
 export const InputCheckbox: InputCheckboxComponent = ({ id, checked = false, disabled, onChange }) => {
@@ -12,6 +12,8 @@ export const InputCheckbox: InputCheckboxComponent = ({ id, checked = false, dis
           "RampInputCheckbox--label-checked": checked,
           "RampInputCheckbox--label-disabled": disabled,
         })}
+        /*Bug 2: OnClick event must be given to label as application is using custom checkbox*/
+        onClick={() => onChange(!checked)}
       />
       <input
         id={inputId}
@@ -19,7 +21,6 @@ export const InputCheckbox: InputCheckboxComponent = ({ id, checked = false, dis
         className="RampInputCheckbox--input"
         checked={checked}
         disabled={disabled}
-        onChange={() => onChange(!checked)}
       />
     </div>
   )
