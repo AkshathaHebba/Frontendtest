@@ -15,7 +15,6 @@ export function App() {
   const { data: transactionsByEmployee, ...transactionsByEmployeeUtils } = useTransactionsByEmployee()
   // const [isLoading, setIsLoading] = useState(false)
 
-  console.log('paginatedTransactions', paginatedTransactions)
 
   const transactions = useMemo(
     () => paginatedTransactions?.data ?? transactionsByEmployee ?? null,

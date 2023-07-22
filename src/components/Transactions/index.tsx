@@ -5,7 +5,7 @@ import { TransactionPane } from "./TransactionPane"
 import { SetTransactionApprovalFunction, TransactionsComponent } from "./types"
 
 export const Transactions: TransactionsComponent = ({ transactions }) => {
-  const { fetchWithoutCache, loading } = useCustomFetch()
+  const { fetchWithoutCache, loading, clearCacheByEndpoint } = useCustomFetch()
 
   const setTransactionApproval = useCallback<SetTransactionApprovalFunction>(
     async ({ transactionId, newValue }) => {
@@ -13,6 +13,8 @@ export const Transactions: TransactionsComponent = ({ transactions }) => {
         transactionId,
         value: newValue,
       })
+      /*BUG 7: After updating the value from endpoint we need to clear cache to remove the old value*/
+        await clearCacheByEndpoint(['paginatedTransactions'])
     },
     [fetchWithoutCache]
   )
